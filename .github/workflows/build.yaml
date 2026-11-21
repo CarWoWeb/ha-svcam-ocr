@@ -1,0 +1,43 @@
+name: Bauen und testen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: frenck/action-addon-linter@v2
+        with:
+          path: ./svcam_ocr
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Image bauen (${{ matrix.arch }})
+        run: docker build -t svcam_ocr:test svcam_ocr
+
+      - name: Rauchtest
+        run: |
+          mkdir -p media
+          docker run -d --name svcam -v "$PWD/media:/media" svcam_ocr:test
+          docker cp .github/scripts/smoke.py svcam:/tmp/smoke.py
+          docker exec svcam python /tmp/smoke.py
+          docker logs svcam
