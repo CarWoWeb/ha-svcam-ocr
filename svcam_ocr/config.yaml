@@ -7,8 +7,6 @@ arch:
   - aarch64
   - amd64
 init: false
-startup: application
-boot: auto
 # Nur Lesezugriff auf /media, kein Port nach außen: erreichbar nur aus Home Assistant
 map:
   - type: media
