@@ -1,7 +1,11 @@
 """Kleiner HTTP-Dienst für Home Assistant.
 
-POST /scan   {"path": "/media/...jpg", "crop_top": 0.07}  -> JSON mit Texten und Kennzeichen
+POST /scan   {"path": "/media/...jpg", "crop_top": 0.07,
+              "bekannt": [...], "whitelist": [...]}       -> JSON mit Texten, Kennzeichen, Treffern
 GET  /health                                              -> {"status": "ok"}
+
+"bekannt" und "whitelist" sind optional. Sind sie da, enthält die Antwort
+"treffer" mit Status whitelist / bekannt / neu je erkanntem Text.
 
 Der Dienst ist nur im internen Netz der Apps erreichbar (kein Port nach außen)
 und liest ausschließlich Bilder unterhalb von MEDIA_ROOT.
@@ -15,19 +19,34 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from abgleich import abgleichen
 from erkennung import Erkennung, bild_laden
 
 OPTIONEN_DATEI = Path(os.environ.get("SVCAM_OPTIONS", "/data/options.json"))
 MEDIA_ROOT = Path(os.environ.get("SVCAM_MEDIA_ROOT", "/media")).resolve()
 PORT = int(os.environ.get("SVCAM_PORT", "8000"))
 ENDUNGEN = {".jpg", ".jpeg", ".png"}
-MAX_BODY = 4096
+MAX_BODY = 512 * 1024  # Listen mit einigen tausend Einträgen passen locker
+MAX_EINTRAEGE = 20000
+MAX_EINTRAG_LAENGE = 200
 
 log = logging.getLogger("svcam_ocr")
 
 
+def liste_pruefen(wert) -> list[str] | None:
+    """Liste von Strings mit vernünftiger Größe, sonst None."""
+    if wert is None:
+        return []
+    if not isinstance(wert, list) or len(wert) > MAX_EINTRAEGE:
+        return None
+    if not all(isinstance(e, str) and len(e) <= MAX_EINTRAG_LAENGE for e in wert):
+        return None
+    return wert
+
+
 def optionen_laden() -> dict:
-    standard = {"crop_top": 0.07, "min_score": 0.5, "ortskennungen": [], "log_level": "info"}
+    standard = {"crop_top": 0.07, "min_score": 0.5, "ortskennungen": [], "log_level": "info",
+                "max_abstand": 1, "min_textlaenge": 3}
     if OPTIONEN_DATEI.is_file():
         standard.update(json.loads(OPTIONEN_DATEI.read_text(encoding="utf-8")))
     return standard
@@ -95,6 +114,13 @@ class Handler(BaseHTTPRequestHandler):
             crop_top = self.optionen["crop_top"]
         crop_top = min(max(crop_top, 0.0), 0.5)
 
+        bekannt = liste_pruefen(anfrage.get("bekannt"))
+        whitelist = liste_pruefen(anfrage.get("whitelist"))
+        if bekannt is None or whitelist is None:
+            self._antwort(400, {"fehler": "bekannt und whitelist müssen Listen von Texten sein"})
+            return
+        mit_abgleich = "bekannt" in anfrage or "whitelist" in anfrage
+
         img = bild_laden(str(pfad))
         if img is None:
             self._antwort(422, {"fehler": "Bild nicht lesbar"})
@@ -106,6 +132,11 @@ class Handler(BaseHTTPRequestHandler):
             self._antwort(500, {"fehler": "Fehler bei der Erkennung"})
             return
         erg["datei"] = pfad.name
+        if mit_abgleich:
+            erg["treffer"] = abgleichen(erg, bekannt, whitelist,
+                                        int(self.optionen["max_abstand"]),
+                                        int(self.optionen["min_textlaenge"]))
+        # Keine Inhalte ins Protokoll, nur Zahlen (Kennzeichen sind personenbezogen)
         log.info("%s: %d Texte, %d Kennzeichen, %.2f s",
                  pfad.name, len(erg["texte"]), len(erg["kennzeichen"]), erg["dauer_s"])
         self._antwort(200, erg)

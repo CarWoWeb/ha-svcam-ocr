@@ -1,5 +1,5 @@
 name: SvCam OCR
-version: "0.1.0"
+version: "0.2.0"
 slug: svcam_ocr
 description: Lokale Texterkennung für Kamerabilder (Kennzeichen und Aufschriften), ohne Cloud
 url: https://github.com/CarWoWeb/ha-svcam-ocr
@@ -15,10 +15,14 @@ options:
   crop_top: 0.07
   min_score: 0.5
   ortskennungen: []
+  max_abstand: 1
+  min_textlaenge: 3
   log_level: info
 schema:
   crop_top: float(0,0.5)
   min_score: float(0,1)
+  max_abstand: int(0,2)
+  min_textlaenge: int(1,10)
   ortskennungen:
     - str
   log_level: list(debug|info|warning|error)

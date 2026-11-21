@@ -42,6 +42,8 @@ def _aufteilen(s: str, suffix: str) -> list[tuple[int, str]]:
         if len(s) - n < 2:
             break
         vorn, block = s[:-n], s[-n:]
+        if not any(c in BUCHSTABEN for c in vorn):
+            continue  # vorn mindestens ein echter Buchstabe
         if not all(c.isdigit() or c in ZU_ZIFFER for c in block):
             continue
         if not any(c.isdigit() for c in block):

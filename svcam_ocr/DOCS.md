@@ -17,6 +17,8 @@ Die App bietet im internen Netz von Home Assistant einen kleinen Dienst an. Eine
 | `crop_top` | `0.07` | Anteil der Bildhöhe, der oben abgeschnitten wird (Zeitstempel). `0.07` = 7 %. |
 | `min_score` | `0.5` | Texte mit geringerer Sicherheit werden verworfen. |
 | `ortskennungen` | leer | Optional: häufige Ortskennungen (zum Beispiel die eigene). Sie werden bei unsicheren Lesungen bevorzugt. |
+| `max_abstand` | `1` | Abgleich: so viele Zeichen dürfen von einem Listeneintrag abweichen (nur bei Texten ab 4 Zeichen). `0` = nur exakt. |
+| `min_textlaenge` | `3` | Abgleich: kürzere Texte (zum Beispiel einzelne Ziffern) werden übergangen. Kennzeichen zählen immer. |
 | `log_level` | `info` | Ausführlichkeit des Protokolls. |
 
 ## Aufruf aus Home Assistant
@@ -43,6 +45,23 @@ Aufruf in einer Automation:
 # ocr.content.texte       -> alle Texte
 # ocr.content.kennzeichen -> erkannte Kennzeichen
 ```
+
+## Abgleich mit Listen
+
+Schickt die Automation zusätzlich `bekannt` und `whitelist` mit (Listen von Texten, zum Beispiel die Einträge zweier To-do-Listen), gleicht die App jeden erkannten Text ab und liefert `treffer`:
+
+```json
+{"path": "/media/ordner/bild.jpg", "bekannt": ["XX-YY 100", "DHL"], "whitelist": ["XX Z 200"]}
+```
+
+```json
+"treffer": [
+  {"art": "kennzeichen", "text": "XXYY100", "status": "bekannt", "eintrag": "XX-YY 100"},
+  {"art": "text", "text": "NEUFIRMA", "status": "neu", "eintrag": null}
+]
+```
+
+Schreibweise (Groß/klein, Leerzeichen, Bindestriche) spielt keine Rolle. Die Whitelist wird zuerst geprüft.
 
 ## Antwort
 
