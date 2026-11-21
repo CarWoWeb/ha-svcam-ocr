@@ -41,9 +41,14 @@ texte = "".join(t["norm"] for t in erg.get("texte", []))
 if status != 200 or "SVCAM" not in texte:
     sys.exit("Text nicht erkannt")
 
-status, erg = post({"path": "/media/smoke.png", "crop_top": 0, "bekannt": ["SVCAM"], "whitelist": []})
+# Schreibweise mit Leerzeichen/Kleinbuchstaben muss trotzdem passen
+status, erg = post({"path": "/media/smoke.png", "crop_top": 0, "bekannt": ["svcam test"], "whitelist": []})
+print(json.dumps(erg.get("treffer"), ensure_ascii=False))
 if status != 200 or not any(t["status"] == "bekannt" for t in erg.get("treffer", [])):
     sys.exit("Abgleich mit bekannter Liste fehlgeschlagen")
+status, erg = post({"path": "/media/smoke.png", "crop_top": 0, "bekannt": [], "whitelist": ["SVCAM-TEST"]})
+if status != 200 or not any(t["status"] == "whitelist" for t in erg.get("treffer", [])):
+    sys.exit("Whitelist greift nicht")
 status, _ = post({"path": "/media/smoke.png", "bekannt": "kein-array"})
 if status != 400:
     sys.exit("Ungültige Liste wurde nicht abgelehnt")
