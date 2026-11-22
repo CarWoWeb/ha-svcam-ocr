@@ -1,4 +1,4 @@
-name: Bauen und testen
+name: Bauen, testen, veröffentlichen
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: read
+
+env:
+  IMAGE: ghcr.io/carwoweb/ha-svcam-ocr
 
 jobs:
   lint:
@@ -21,6 +24,7 @@ jobs:
         run: python3 -m unittest discover -s svcam_ocr/tests -v
 
   build:
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -30,11 +34,23 @@ jobs:
           - arch: aarch64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v7
 
+      - name: Version lesen
+        id: v
+        run: |
+          echo "version=$(sed -n 's/^version: *"\(.*\)"/\1/p' svcam_ocr/config.yaml)" >> "$GITHUB_OUTPUT"
+
       - name: Image bauen (${{ matrix.arch }})
-        run: docker build -t svcam_ocr:test svcam_ocr
+        run: >-
+          docker build
+          --build-arg BUILD_ARCH=${{ matrix.arch }}
+          --build-arg BUILD_VERSION=${{ steps.v.outputs.version }}
+          -t svcam_ocr:test svcam_ocr
 
       - name: Rauchtest
         run: |
@@ -43,3 +59,41 @@ jobs:
           docker cp .github/scripts/smoke.py svcam:/tmp/smoke.py
           docker exec svcam python /tmp/smoke.py
           docker logs svcam
+
+      - name: Anmelden bei ghcr.io
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Image hochladen (nur neue Versionen)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          V=${{ steps.v.outputs.version }}
+          if docker manifest inspect "$IMAGE:$V" > /dev/null 2>&1; then
+            echo "Version $V ist schon veröffentlicht, nichts zu tun. Für Änderungen die Version in config.yaml erhöhen."
+            exit 0
+          fi
+          docker tag svcam_ocr:test "$IMAGE:$V-${{ matrix.arch }}"
+          docker push "$IMAGE:$V-${{ matrix.arch }}"
+
+  manifest:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Anmelden bei ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Multi-Arch-Tag erstellen
+        run: |
+          V=$(sed -n 's/^version: *"\(.*\)"/\1/p' svcam_ocr/config.yaml)
+          if docker manifest inspect "$IMAGE:$V" > /dev/null 2>&1; then
+            echo "Version $V ist schon veröffentlicht, nichts zu tun."
+            exit 0
+          fi
+          docker buildx imagetools create -t "$IMAGE:$V" "$IMAGE:$V-amd64" "$IMAGE:$V-aarch64"
+          docker buildx imagetools inspect "$IMAGE:$V"

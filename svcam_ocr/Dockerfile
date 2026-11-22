@@ -1,5 +1,19 @@
-ARG BUILD_FROM=python:3.12-slim-bookworm
-FROM ${BUILD_FROM}
+# Basis: offizielles Python-Image (Debian). Die Home-Assistant-Basisimages mit Python
+# sind Alpine (musl), dafür gibt es keine ONNX-Runtime-Pakete.
+# Seit Supervisor 2026.04 wird BUILD_FROM nicht mehr übergeben, daher fester Name.
+FROM docker.io/library/python:3.12-slim-bookworm
+
+# Werden vom Supervisor bzw. von der GitHub-Automatik übergeben
+ARG BUILD_ARCH=amd64
+ARG BUILD_VERSION=dev
+
+LABEL io.hass.type="app" \
+      io.hass.arch="${BUILD_ARCH}" \
+      io.hass.version="${BUILD_VERSION}" \
+      io.hass.name="SvCam OCR" \
+      io.hass.description="Lokale Texterkennung für Kamerabilder" \
+      org.opencontainers.image.source="https://github.com/CarWoWeb/ha-svcam-ocr" \
+      org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

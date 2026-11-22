@@ -1,8 +1,10 @@
 name: SvCam OCR
-version: "0.2.0"
+version: "0.2.1"
 slug: svcam_ocr
 description: Lokale Texterkennung für Kamerabilder (Kennzeichen und Aufschriften), ohne Cloud
 url: https://github.com/CarWoWeb/ha-svcam-ocr
+# Fertiges Image für amd64 und aarch64, Home Assistant lädt den Tag passend zu "version"
+image: ghcr.io/carwoweb/ha-svcam-ocr
 arch:
   - aarch64
   - amd64

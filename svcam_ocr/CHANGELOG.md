@@ -1,5 +1,10 @@
 # Änderungen
 
+## 0.2.1
+
+- Installation repariert: `build.yaml` entfernt (seit Supervisor 2026.04 veraltet), Basis-Image fest im Dockerfile.
+- Fertige Images für amd64 und aarch64 auf ghcr.io: Home Assistant lädt die App herunter statt sie auf dem Gerät zu bauen.
+
 ## 0.2.0
 
 - Abgleich mit einer Liste bekannter Texte und einer Whitelist: `/scan` nimmt optional `bekannt` und `whitelist` an und liefert `treffer` mit Status `whitelist`, `bekannt` oder `neu`.
