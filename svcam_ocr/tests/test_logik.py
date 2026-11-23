@@ -55,6 +55,19 @@ class Kennzeichen(unittest.TestCase):
         a.lesung("BXXY100", 0.9)
         self.assertEqual(a.ergebnis()[0], "XXY100")
 
+    def test_plakette_als_buchstabe(self):
+        # Plakette zwischen Ortskennung und Erkennung als "Q" gelesen: XX + QYY ist unmöglich
+        a = Abstimmung(ortskennungen=frozenset({"XX"}))
+        a.lesung("XXQYY100", 0.95, eu_feld=False)
+        a.lesung("XXQYY100", 0.9, eu_feld=False)
+        a.lesung("XXYY100", 0.8, eu_feld=False)
+        self.assertEqual(a.ergebnis()[0], "XXYY100")
+
+    def test_eu_feld_sicher_abgeschnitten(self):
+        a = Abstimmung()
+        a.lesung("XXY100", 0.9, eu_feld=False)
+        self.assertEqual(list(a.stimmen), ["XXY100"])
+
 
 class Abgleich(unittest.TestCase):
     def test_abstand(self):

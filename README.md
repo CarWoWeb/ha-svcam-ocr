@@ -8,7 +8,7 @@ App-Repository (Add-ons) für Home Assistant.
 
 ## Installation
 
-1. In Home Assistant: **Einstellungen → Apps → App-Store → ⋮ → Repositories**.
+1. In Home Assistant: **Einstellungen → Apps → App installieren** (unten rechts), im App-Store oben rechts **⋮ → Repositories**.
 2. Diese Adresse eintragen: `https://github.com/CarWoWeb/ha-svcam-ocr`
 3. **SvCam OCR** installieren und starten. Home Assistant lädt ein fertiges Image (amd64 oder aarch64) von `ghcr.io/carwoweb/ha-svcam-ocr`, gebaut wird nichts.
 

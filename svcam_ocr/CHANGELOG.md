@@ -1,5 +1,10 @@
 # Änderungen
 
+## 0.2.2
+
+- Kennzeichen: Das blaue EU-Feld wird jetzt im Bild gesucht und genau dahinter abgeschnitten. Der bisherige feste Beschnitt links konnte bei Kennzeichen ohne mitgelesenes EU-Feld den ersten Buchstaben der Ortskennung kappen.
+- Kennzeichen: Mit eingetragenen `ortskennungen` werden unmögliche Aufteilungen abgewertet (nach der Ortskennung höchstens zwei Erkennungsbuchstaben). Das hilft, wenn die Plaketten als Buchstabe gelesen werden.
+
 ## 0.2.1
 
 - Installation repariert: `build.yaml` entfernt (seit Supervisor 2026.04 veraltet), Basis-Image fest im Dockerfile.

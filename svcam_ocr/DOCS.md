@@ -16,7 +16,7 @@ Die App bietet im internen Netz von Home Assistant einen kleinen Dienst an. Eine
 |:--|:--|:--|
 | `crop_top` | `0.07` | Anteil der Bildhöhe, der oben abgeschnitten wird (Zeitstempel). `0.07` = 7 %. |
 | `min_score` | `0.5` | Texte mit geringerer Sicherheit werden verworfen. |
-| `ortskennungen` | leer | Optional: häufige Ortskennungen (zum Beispiel die eigene). Sie werden bei unsicheren Lesungen bevorzugt. |
+| `ortskennungen` | leer | Empfohlen: die Ortskennungen, die bei dir häufig vorkommen (zum Beispiel die eigene und die Nachbarkreise). Sie werden bei unsicheren Lesungen bevorzugt, und Lesungen, bei denen eine Plakette als Buchstabe mitgelesen wurde, fallen raus. |
 | `max_abstand` | `1` | Abgleich: so viele Zeichen dürfen von einem Listeneintrag abweichen (nur bei Texten ab 4 Zeichen). `0` = nur exakt. |
 | `min_textlaenge` | `3` | Abgleich: kürzere Texte (zum Beispiel einzelne Ziffern) werden übergangen. Kennzeichen zählen immer. |
 | `log_level` | `info` | Ausführlichkeit des Protokolls. |

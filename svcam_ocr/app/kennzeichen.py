@@ -81,7 +81,8 @@ class Abstimmung:
     ortskennungen: frozenset[str] = frozenset()
     stimmen: dict[str, float] = field(default_factory=dict)
 
-    def lesung(self, text: str, score: float) -> None:
+    def lesung(self, text: str, score: float, eu_feld: bool = True) -> None:
+        """eu_feld=False: Das EU-Feld ist sicher abgeschnitten, also keine Variante ohne ersten Buchstaben."""
         norm = normalisieren(text)
         if not norm:
             return
@@ -90,16 +91,30 @@ class Abstimmung:
         if rep:
             varianten.append((rep, 1.0))
         # Blaues EU-Feld wird oft als zusätzlicher Buchstabe vorn gelesen
-        if len(norm) > 4 and norm[0] in BUCHSTABEN:
+        if eu_feld and len(norm) > 4 and norm[0] in BUCHSTABEN:
             rep2 = reparieren(norm[1:])
             if rep2 and rep2 != rep:
                 varianten.append((rep2, 0.8))
         for kz, gewicht in varianten:
-            bonus = 1.5 if self._ort_bekannt(kz) else 1.0
-            self.stimmen[kz] = self.stimmen.get(kz, 0.0) + score * gewicht * bonus
+            self.stimmen[kz] = self.stimmen.get(kz, 0.0) + score * gewicht * self._ort_faktor(kz)
 
-    def _ort_bekannt(self, kz: str) -> bool:
-        return any(kz[:n] in self.ortskennungen for n in (1, 2, 3))
+    def _ort_faktor(self, kz: str) -> float:
+        """Bonus für bekannte Ortskennungen, Abzug für unmögliche Aufteilungen.
+
+        Beginnt die Lesung mit einer bekannten Ortskennung, müssen danach 1-2
+        Erkennungsbuchstaben folgen. "XX" + "QYY" wäre unmöglich; das passiert,
+        wenn die Plaketten zwischen Ortskennung und Erkennung als Buchstabe
+        gelesen werden.
+        """
+        if not self.ortskennungen:
+            return 1.0
+        buchstaben = re.match(r"[A-ZÄÖÜ]*", kz).group()
+        bekannt = [n for n in (1, 2, 3) if buchstaben[:n] in self.ortskennungen]
+        if not bekannt:
+            return 1.0
+        if any(1 <= len(buchstaben) - n <= 2 for n in bekannt):
+            return 1.5
+        return 0.3
 
     def ergebnis(self) -> tuple[str, float, dict[str, float]] | None:
         if not self.stimmen:
