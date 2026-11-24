@@ -46,6 +46,18 @@ status, erg = post({"path": "/media/smoke.png", "crop_top": 0, "bekannt": ["svca
 print(json.dumps(erg.get("treffer"), ensure_ascii=False))
 if status != 200 or not any(t["status"] == "bekannt" for t in erg.get("treffer", [])):
     sys.exit("Abgleich mit bekannter Liste fehlgeschlagen")
+if not all(t.get("anzahl", 0) >= 1 for t in erg["treffer"] if t["status"] != "whitelist"):
+    sys.exit("Zähler aus dem Verlauf fehlt")
+status, erg = post({"aktion": "aufraeumen", "behalten": []})
+if status != 200 or erg.get("geloescht", 0) < 1:
+    sys.exit("Aufräumen des Verlaufs fehlgeschlagen")
+# Verlaufsseite antwortet nur dem Ingress-Proxy des Supervisors
+try:
+    urllib.request.urlopen("http://127.0.0.1:8099/", timeout=5)
+    sys.exit("Verlaufsseite ohne Ingress erreichbar")
+except urllib.error.HTTPError as e:
+    if e.code != 403:
+        sys.exit(f"Verlaufsseite: unerwarteter Status {e.code}")
 status, erg = post({"path": "/media/smoke.png", "crop_top": 0, "bekannt": [], "whitelist": ["SVCAM-TEST"]})
 if status != 200 or not any(t["status"] == "whitelist" for t in erg.get("treffer", [])):
     sys.exit("Whitelist greift nicht")

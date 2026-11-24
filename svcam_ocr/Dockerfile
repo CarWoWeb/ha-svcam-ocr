@@ -26,7 +26,7 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
 # Modelle beim Bauen laden, damit die App später ohne Internet startet
-RUN python -c "from rapidocr import RapidOCR; RapidOCR()"
+RUN python -c "from rapidocr import RapidOCR; RapidOCR()"  && python -c "from fast_plate_ocr import LicensePlateRecognizer; LicensePlateRecognizer('cct-xs-v2-global-model')"  && python -c "from open_image_models import create_detector; create_detector('yolo-v9-s-608-license-plate-end2end')"
 
 COPY app/ /app/
 

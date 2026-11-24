@@ -14,4 +14,4 @@ App-Repository (Add-ons) für Home Assistant.
 
 ## Lizenz
 
-MIT. Die Texterkennung nutzt [RapidOCR](https://github.com/RapidAI/RapidOCR) (Apache 2.0) mit PaddleOCR-Modellen (Apache 2.0).
+MIT. Die Texterkennung nutzt [RapidOCR](https://github.com/RapidAI/RapidOCR) (Apache 2.0) mit PaddleOCR-Modellen (Apache 2.0). Kennzeichen erkennen [open-image-models](https://github.com/ankandrew/open-image-models) und [fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr) (beide MIT).

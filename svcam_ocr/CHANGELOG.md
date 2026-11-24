@@ -1,5 +1,13 @@
 # Änderungen
 
+## 0.3.0
+
+- **Kennzeichen neu:** eigener Kennzeichen-Detektor (open-image-models YOLOv9-s) und Kennzeichen-Lesemodell (fast-plate-ocr cct-xs-v2), Abstimmung über drei Ränder, unsichere Lesungen werden verworfen. Findet auch kleine Kennzeichen und nachts. RapidOCR bleibt für alle anderen Texte und als Rückfall. Auf den bisherigen Testbildern 12 statt 7 von 13 Kennzeichen richtig. Neue Option `kennzeichen_modell`.
+- Neue Seite **SvCam Verlauf** in der Seitenleiste (Ingress): Bilder je Text, neueste zuerst, seitenweise und nur als kleine Vorschau geladen. Die Bilder liegen verkleinert im Speicher der App.
+- Bildpaare: Zu einem Bild mit `hochauflosung` wird das passende Bild mit `standardauflosung` gesucht (gleicher Name, Zeitstempel -5 bis +15 s) und als `vorschau` geliefert. Neue Option `bildpaar_warten_s`.
+- `/scan` liefert je gemeldetem Text die Anzahl der Sichtungen (`anzahl`) und den Link zur Verlaufsseite (`verlauf_link`). Optional nimmt es `beschreibungen` an.
+- `/scan` mit `{"aktion": "aufraeumen", "behalten": [...]}` räumt den Verlauf auf.
+
 ## 0.2.2
 
 - Kennzeichen: Das blaue EU-Feld wird jetzt im Bild gesucht und genau dahinter abgeschnitten. Der bisherige feste Beschnitt links konnte bei Kennzeichen ohne mitgelesenes EU-Feld den ersten Buchstaben der Ortskennung kappen.
