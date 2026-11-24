@@ -21,7 +21,11 @@ jobs:
         with:
           path: ./svcam_ocr
       - name: Logik-Tests
-        run: python3 -m unittest discover -s svcam_ocr/tests -v
+        # numpy und OpenCV braucht der Verlaufs-Test (Bilder verkleinern), gleiche Versionen wie im Image
+        run: |
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install -q numpy==2.5.5 opencv-python-headless==5.1.0.95
+          /tmp/venv/bin/python -m unittest discover -s svcam_ocr/tests -v
 
   build:
     needs: lint
