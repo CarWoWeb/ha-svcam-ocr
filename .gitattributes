@@ -1,0 +1,5 @@
+# Im oeffentlichen Repo immer LF, auch wenn die Dateien unter Windows mit CRLF kopiert werden
+* text=auto eol=lf
+*.onnx binary
+*.jpg binary
+*.png binary
