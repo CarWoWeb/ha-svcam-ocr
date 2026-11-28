@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.3.1
+
+- Push antippen öffnet die Verlaufsseite wieder: Link auf `/app/<slug>` statt `/hassio/ingress/<slug>`, den die aktuelle Oberfläche von Home Assistant nicht mehr kennt.
+
 ## 0.3.0
 
 - **Kennzeichen neu:** eigener Kennzeichen-Detektor (open-image-models YOLOv9-s) und Kennzeichen-Lesemodell (fast-plate-ocr cct-xs-v2), Abstimmung über drei Ränder, unsichere Lesungen werden verworfen. Findet auch kleine Kennzeichen und nachts. RapidOCR bleibt für alle anderen Texte und als Rückfall. Auf den bisherigen Testbildern 12 statt 7 von 13 Kennzeichen richtig. Neue Option `kennzeichen_modell`.

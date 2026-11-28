@@ -14,6 +14,7 @@ MAX_JE_TEXT Sichtungen, Bilder ohne erkannten Text höchstens TAGE_LEER Tage.
 
 from __future__ import annotations
 
+import os
 import re
 import sqlite3
 import threading
@@ -48,6 +49,16 @@ def kamera_aus_name(name: str) -> str:
     rest = re.sub(r"\.(jpe?g|png)$", "", rest, flags=re.I)
     rest = re.sub(r"_?(in_)?(hoch|standard)auflosung", "", rest, flags=re.I)
     return rest.replace("_", " ").strip() or "Kamera"
+
+
+def verlauf_link() -> str | None:
+    """Pfad der Verlaufsseite in Home Assistant. Der Supervisor setzt den Hostnamen
+    aus dem Slug der App (Unterstrich wird Bindestrich). In der aktuellen Oberfläche
+    liegen App-Seiten unter /app/<slug>, der alte Pfad /hassio/ingress/<slug> führt ins Leere."""
+    host = os.environ.get("HOSTNAME", "")
+    if not re.fullmatch(r"[a-z0-9]+-svcam-ocr", host):
+        return None
+    return "/app/" + host.replace("-", "_")
 
 
 def partner_finden(pfad: Path, warten_s: float = 8.0, von_s: int = -5, bis_s: int = 15) -> Path | None:

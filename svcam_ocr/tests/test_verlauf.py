@@ -138,6 +138,17 @@ class VerlaufTest(unittest.TestCase):
             self.assertIn('loading="lazy"', html) if "bild/" in html else None
 
 
+class Link(unittest.TestCase):
+    def test_link_auf_app_seite(self):
+        import os
+        from unittest import mock
+        with mock.patch.dict(os.environ, {"HOSTNAME": "1a2b3c4d-svcam-ocr"}):
+            from verlauf import verlauf_link
+            self.assertEqual(verlauf_link(), "/app/1a2b3c4d_svcam_ocr")
+        with mock.patch.dict(os.environ, {"HOSTNAME": "fremder-host"}):
+            self.assertIsNone(verlauf_link())
+
+
 class Endung(unittest.TestCase):
     def test_e_und_h_am_ende(self):
         self.assertEqual(reparieren("XXY100E"), "XXY100E")

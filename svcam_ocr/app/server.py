@@ -32,7 +32,7 @@ from abgleich import abgleichen
 from erkennung import Erkennung, bild_laden
 from kennzeichen import normalisieren
 from seite import bilder_seite, texte_seite
-from verlauf import Verlauf, partner_finden
+from verlauf import Verlauf, partner_finden, verlauf_link
 
 OPTIONEN_DATEI = Path(os.environ.get("SVCAM_OPTIONS", "/data/options.json"))
 MEDIA_ROOT = Path(os.environ.get("SVCAM_MEDIA_ROOT", "/media")).resolve()
@@ -92,15 +92,6 @@ def paare_pruefen(wert) -> list | None:
                 and len(p[0]) <= MAX_EINTRAG_LAENGE and len(p[1]) <= 2000):
             return None
     return wert
-
-
-def verlauf_link() -> str | None:
-    """Pfad der Verlaufsseite in Home Assistant. Der Supervisor setzt den Hostnamen
-    aus dem Slug der App (Unterstrich wird Bindestrich)."""
-    host = os.environ.get("HOSTNAME", "")
-    if not re.fullmatch(r"[a-z0-9]+-svcam-ocr", host):
-        return None
-    return "/hassio/ingress/" + host.replace("-", "_")
 
 
 class Handler(BaseHTTPRequestHandler):
