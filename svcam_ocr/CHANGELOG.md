@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.3.2
+
+- Kurze reine Zahlen (bis 4 Ziffern) direkt über oder auf einem gefundenen Kennzeichen meldet die App nicht mehr als Text. Das waren Markenlogos am Heck, die die Texterkennung als Ziffern liest, oder Bruchstücke des Kennzeichens. Hausnummern und Schilder weiter weg bleiben Text.
+
 ## 0.3.1
 
 - Push antippen öffnet die Verlaufsseite wieder: Link auf `/app/<slug>` statt `/hassio/ingress/<slug>`, den die aktuelle Oberfläche von Home Assistant nicht mehr kennt.

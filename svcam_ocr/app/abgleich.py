@@ -51,8 +51,8 @@ def abgleichen(erg: dict, bekannt: list[str], whitelist: list[str],
     for kz in erg.get("kennzeichen", []):
         kandidaten.append(("kennzeichen", kz["kennzeichen"]))
     for t in erg.get("texte", []):
-        if "kennzeichen" in t or t.get("unsicher"):
-            continue  # schon als Kennzeichen erfasst oder unlesbares Kennzeichen
+        if "kennzeichen" in t or t.get("unsicher") or t.get("logo"):
+            continue  # schon als Kennzeichen erfasst, unlesbares Kennzeichen oder Logo-Zahl
         if len(t["norm"]) >= min_textlaenge:
             kandidaten.append(("text", t["norm"]))
 

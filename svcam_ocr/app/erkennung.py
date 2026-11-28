@@ -21,7 +21,7 @@ import numpy as np
 from rapidocr import RapidOCR
 
 from abgleich import abstand
-from kennzeichen import Abstimmung, ist_kandidat, normalisieren, reparieren
+from kennzeichen import Abstimmung, ist_kandidat, ist_logo_zahl, normalisieren, reparieren
 
 DETEKTOR = "yolo-v9-s-608-license-plate-end2end"
 LESER = "cct-xs-v2-global-model"
@@ -146,7 +146,10 @@ class Erkennung:
                 if not norm:
                     continue
                 eintrag = {"text": txt, "norm": norm, "score": round(float(score), 3)}
-                if ist_kandidat(norm):
+                kaesten = [k["kasten"] for k in kennzeichen if "kasten" in k] + verworfen
+                if ist_logo_zahl(norm, box, kaesten):
+                    eintrag["logo"] = True  # Markenlogo oder Kennzeichen-Bruchstück, nicht melden
+                elif ist_kandidat(norm):
                     # Gehört der Text zu einem schon gelesenen Kennzeichen? Dann nicht doppelt melden.
                     # Im Kasten zählt nur, was selbst wie ein Kennzeichen aussieht (Schriftzüge bleiben Text).
                     wie_kz = reparieren(norm) is not None

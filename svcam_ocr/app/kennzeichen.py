@@ -35,6 +35,26 @@ def ist_kandidat(norm: str) -> bool:
             and any(c.isdigit() or c in ZU_ZIFFER for c in norm[1:]))
 
 
+def ist_logo_zahl(norm: str, box, kaesten) -> bool:
+    """Kurze reine Zahl direkt über oder auf einem Kennzeichen: meist ein Markenlogo
+    (z. B. vier Ringe, als "1395" gelesen) oder ein Bruchstück des Kennzeichens.
+
+    box: vier Eckpunkte des Textes, kaesten: Kennzeichenkästen (x1, y1, x2, y2, ...).
+    Gesucht wird seitlich eine halbe Kastenbreite daneben, nach oben drei Kastenhöhen,
+    nach unten eine halbe. Hausnummern und Schilder weiter weg bleiben Text.
+    """
+    if not re.fullmatch(r"\d{1,4}", norm):
+        return False
+    mx = sum(p[0] for p in box) / len(box)
+    my = sum(p[1] for p in box) / len(box)
+    for k in kaesten:
+        x1, y1, x2, y2 = (float(v) for v in k[:4])
+        b, h = x2 - x1, y2 - y1
+        if x1 - b / 2 <= mx <= x2 + b / 2 and y1 - 3 * h <= my <= y2 + h / 2:
+            return True
+    return False
+
+
 def _aufteilen(s: str, suffix: str) -> list[tuple[int, str]]:
     """Alle gültigen Aufteilungen von s in Buchstaben + Ziffern, mit Anzahl Ersetzungen."""
     ergebnisse = []
